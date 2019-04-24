@@ -97,11 +97,20 @@ def find_addr_set_name(row_num):
             while previous_line > 0:
                 if 'address-set' in get_line(previous_line):
                     print(previous_line+2, get_line(previous_line))
+                    if get_line(previous_line)[2] in ip_add_name_list:
+                        break
+                    else:
+                        ip_add_name_list.append(get_line(previous_line)[2])
                     break
                 previous_line -= 1
 
 
+
+ip_add_name_list = []
 i = 0
 while i <= rows-1:
     find_addr_set_name(i)
     i += 1
+print(ip_add_name_list)
+ip_list = ip_list + ip_add_name_list
+
