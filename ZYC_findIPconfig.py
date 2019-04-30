@@ -77,6 +77,7 @@ ip_list = [
 '10.166.1.53',
 '10.166.1.0']
 
+
 def get_line(row_num):
     per_line = str(f.iloc[row_num]).split()
     per_line.pop()
@@ -96,7 +97,7 @@ def find_addr_set_name(row_num):
             previous_line = row_num - 1
             while previous_line > 0:
                 if 'address-set' in get_line(previous_line):
-                    print(previous_line+2, get_line(previous_line))
+                    # print(previous_line+2, get_line(previous_line))
                     if get_line(previous_line)[2] in ip_add_name_list:
                         break
                     else:
@@ -105,12 +106,57 @@ def find_addr_set_name(row_num):
                 previous_line -= 1
 
 
+def find_acl_name(row_num):
+    f_loc = get_line(row_num)
+    # print(f_loc)
+    for ip_addr in ip_list:
+        if (ip_addr in f_loc) and ('rule' in f_loc):
+            # print(row_num+2, f_loc)
+            previous_line = row_num - 1
+            while previous_line > 0:
+                if 'number' in get_line(previous_line):
+                    # print(get_line(previous_line))
+                    # print(f_loc)
+                    if get_line(previous_line)[2] in acl_name_list:
+                        break
+                    else:
+                        acl_name_list.append(get_line(previous_line)[2])
+                    break
+                previous_line -= 1
+
 
 ip_add_name_list = []
 i = 0
 while i <= rows-1:
     find_addr_set_name(i)
     i += 1
+ip_add_name_list.pop()
 print(ip_add_name_list)
 ip_list = ip_list + ip_add_name_list
 
+acl_name_list = []
+n = 0
+while n <= rows-1:
+    find_acl_name(n)
+    n += 1
+print(acl_name_list)
+
+for acl_name in acl_name_list:
+    rule_list_name = 'rule_list_%s' % acl_name
+    print(rule_list_name)
+    a = 1
+    while a <= rows-1:
+        f_loc = get_line(a)
+        if 'acl' in f_loc and 'number' in f_loc and acl_name in f_loc:
+            b = 1
+            while b <= 300:
+                f_loc_rule = get_line(a+b)
+                for per_ip_add in ip_list:
+                    if 'rule' in f_loc_rule and per_ip_add in f_loc_rule:
+                        print(f_loc_rule)
+                    elif 'acl' in f_loc and 'number' in f_loc:
+                        continue
+                    else:
+                        print('why can i find the acl number')
+                b += 1
+        a += 1
